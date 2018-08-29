@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="pt-br">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Métodos de Busca - Inteligência Artificial</title>
+
+    <link href="./assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="./assets/css/style.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script defer src="./assets/js/fontawesome-all.min.js"></script>
+    <script defer src="./assets/js/toastr.min.js"></script>
+
+
+    <!-- Métodos/Funções Compartilhadas -->
+    <script defer src="./metodosCompartilhados.js"></script>
+
+    <!-- Algoritmo Largura -->
+    <script defer src="./largura.js"></script>
+
+    <!-- Algoritmo Guloso -->
+    <script defer src="./guloso.js"></script>
+
+    <!-- Algoritmo Profundidade -->
+    <script defer src="./profundidade.js"></script>
+
+    <!-- Algoritmo A* -->
+    <script defer src="./estrela.js"></script>
+
+
+  </head>
+
+  <body class="bg-light">
+
+    <!-- Fundo - Estrelas -->
+    <div class="stars"></div>
+
+    <!-- Fundo - Nuvens -->
+    <div class="clouds"></div>
+
+    <!-- Cenário (Tabuleiro) -->
+    <div id="cenario">
+    </div>
+
+    <!-- Foguete -->
+    <span class="fa-layers fa-fw fa-3x" id="foguete" style="">
+      <i class="fas fa-user" data-fa-transform="shrink-14 up-4 right-4 rotate-45" style="color: #FFF;"></i>
+      <i class="fas fa-rocket" style="color: #8e44ad;"></i>
+      <i class="fab fa-react fa-inverse" data-fa-transform="shrink-13" style="color: #FFF;"></i>
+      <i class="fab fa-gripfire" data-fa-transform="shrink-10 rotate-240 down-7 left-8" id="fogoFoguete" style="color: red; display: none;"></i>
+    </span>
+
+    <!-- Botão de Opções -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#opcoesModal" style="position: fixed; right: 10px; top: 10px; z-index:99;">Opções</button>
+
+    <!-- Modal de Opções -->
+    <div class="modal fade" id="opcoesModal" tabindex="-1" role="dialog" aria-labelledby="opcoesModal" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Opções</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            
+            <div id="accordion">
+  
+              <div class="card">
+                <div class="card-header" id="headingOne">
+                  <h5 class="mb-0">
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                      Configurar cenário
+                    </button>
+                  </h5>
+                </div>
+
+                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                  <div class="card-body">
+                    
+                    <div class="form-row">
+
+                      <div class="col-md-12">
+                        <h4>Cenário</h4>
+                      </div>
+
+                      <div class="form-group col-md-4">
+                        <label for="colunas">Número de linhas</label>
+                        <input type="number" min="1" class="form-control" name="colunas" id="colunas" value="16">
+                      </div>
+
+                      <div class="form-group col-md-4">
+                        <label for="linhas">Número de colunas</label>
+                        <input type="number" min="1" class="form-control" name="linhas" id="linhas" value="32">
+                      </div>
+
+                      <div class="form-group col-md-4">
+                        <label for="asteroides">Quantidade de asteroides</label>
+                        <input type="number" min="1" class="form-control" name="asteroides" id="asteroides" value="50">
+                      </div>
+
+
+                      <div class="col-md-12">
+                        <br />
+                        <h4>Posição inicial/final</h4>
+                      </div>
+
+                      <div class="form-group col-md-3">
+                        <label for="colunaI">Linha inicial (y)</label>
+                        <input type="number" min="1" class="form-control" name="colunaI" id="colunaI" value="1">
+                      </div>
+
+                      <div class="form-group col-md-3">
+                        <label for="linhaI">Coluna inicial (x)</label>
+                        <input type="number" min="1" class="form-control" name="linhaI" id="linhaI" value="1">
+                      </div>
+
+                      <div class="form-group col-md-3">
+                        <label for="colunaF">Linha final (y)</label>
+                        <input type="number" min="1" class="form-control" name="colunaF" id="colunaF" value="16">
+                      </div>
+
+                      <div class="form-group col-md-3">
+                        <label for="linhaF">Coluna final (x)</label>
+                        <input type="number" min="1" class="form-control" name="linhaF" id="linhaF" value="32">
+                      </div>
+
+                      <div class="col-md-12 text-right">
+                        <button type="button" class="btn btn-success" id="btnGerar"><i class="far fa-cube"></i> Gerar cenário</button>
+                      </div>
+
+                  </div>
+                </div>
+              </div>
+  
+              <div class="card">
+                <div class="card-header" id="headingTwo">
+                  <h5 class="mb-0">
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                      Métodos de busca
+                    </button>
+                  </h5>
+                </div>
+
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                  <div class="card-body">
+                      
+                      <div class="row" style="padding:10px;margin-bottom:20px;border:1px solid #000;">
+                        <div class="col-md-8">
+                          <h5>Busca em largura</h5>
+                          <div class="col" id="avLargura">
+                            Aguardando execução.
+                          </div>
+                        </div>
+
+                        <div class="col-md-4">
+                          <button type="button" class="btn btn-success btn-block" id="btnLargura"><i class="far fa-play"></i> Rodar largura</button>
+                        </div>
+                      </div>
+
+
+                      <div class="row" style="padding:10px;margin-bottom:20px;border:1px solid #000;">                        
+                        <div class="col-md-8">
+                          <h5>Busca em profundidade</h5>
+                          <div class="col" id="avProfundidade">
+                            Aguardando execução.
+                          </div>
+                        </div>
+
+                        <div class="col-md-4">
+                          <button type="button" class="btn btn-success btn-block" id="btnProfundidade"><i class="far fa-play"></i> Rodar profundidade</button>
+                        </div>
+                      </div>
+
+
+                      <div class="row" style="padding:10px;margin-bottom:20px;border:1px solid #000;">                        
+                        <div class="col-md-8">
+                          <h5>Guloso</h5>
+                          <div class="col" id="avGuloso">
+                            Aguardando execução.
+                          </div>
+                        </div>
+
+                        <div class="col-md-4">
+                          <button type="button" class="btn btn-success btn-block" id="btnGuloso"><i class="far fa-play"></i> Rodar Guloso</button>
+                        </div>
+                      </div>
+
+
+                      <div class="row" style="padding:10px;margin-bottom:20px;border:1px solid #000;">                        
+                        <div class="col-md-8">
+                          <h5>A*</h5>
+                          <div class="col" id="avAEstrela">
+                            Aguardando execução.
+                          </div>
+                        </div>
+
+                        <div class="col-md-4">
+                          <button type="button" class="btn btn-success btn-block" id="btnAEstrela"><i class="far fa-play"></i> Rodar A*</button>
+                        </div>
+                      </div>
+
+
+
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Fim Modal de Opções -->
+    
+    <script src="./assets/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+
+      var maxWidth, maxHeight, linhas, colunas, inicioX, inicioY, fimX, fimY, asteroides, wObj, hObj, topAt, oldTopAt = 0;
+      var cenario         = new Array();
+      var gerou           = false;
+
+      // Largura
+      var larguraRes      = null;
+      var rodouLargura    = false;
+
+      // Guloso
+      var ProfundRes       = null;
+      var rodouProfund     = false;
+
+      // Guloso
+      var GulosoRes        = null;
+      var rodouGuloso      = false;
+
+      // A*
+      var AStarRes        = null;
+      var rodouAStar      = false;
+
+      // Metodo de movimentar o Foguete (animado)
+      $.fn.animateRotate = function(startAngle, endAngle, duration, easing, complete){
+          return this.each(function(){
+              var elem = $(this);
+
+              $({deg: startAngle}).animate({deg: endAngle}, {
+                  duration: duration,
+                  easing: easing,
+                  step: function(now){
+                      elem.css({
+                        '-moz-transform':'rotate('+now+'deg)',
+                        '-webkit-transform':'rotate('+now+'deg)',
+                        '-o-transform':'rotate('+now+'deg)',
+                        '-ms-transform':'rotate('+now+'deg)',
+                        'transform':'rotate('+now+'deg)'
+                      });
+                  },
+                  complete: complete || $.noop
+              });
+          });
+      };
+
+      // Inicio gerar cenario
+      $('#btnGerar').on('click', function() {
+
+        maxWidth    = $(window).width() - 20;
+        maxHeight   = $(window).height() - 20; 
+
+        linhas      = parseInt($('#linhas').val());
+        colunas     = parseInt($('#colunas').val());
+
+        inicioX     = parseInt($('#linhaI').val());
+        inicioY     = parseInt($('#colunaI').val());
+
+        fimX        = parseInt($('#linhaF').val());
+        fimY        = parseInt($('#colunaF').val());
+
+        asteroides  = $('#asteroides').val();
+
+        wObj        = Math.round(maxWidth/linhas);
+        hObj        = Math.round(maxHeight/colunas);
+
+        if(hObj > wObj)
+          hObj      = wObj;
+        else
+          wObj      = hObj;
+
+        // Verificações
+        if(inicioX == fimX && inicioY == fimY)
+        {
+          toastr.error("A posição inicial precisa ser diferente da final.");
+        }
+        else if(inicioX < 1 || inicioY < 1 || fimX < 1 || fimY < 1)
+        {
+          toastr.error("A posição mínima é [1,1].");
+        }
+        else if(inicioX > linhas || inicioY > colunas || fimX > linhas || fimY > colunas)
+        {
+          toastr.error("A posição máxima é ["+colunas+","+linhas+"].");
+        }
+        else if(asteroides > (linhas*colunas)/2)
+        {
+          toastr.error("O máximo de asteroides permitido é de "+(linhas*colunas)/2+" (metade do cenário).");
+        }
+        else if(hObj < 40)
+        {
+          var resMinW  = Math.round(maxWidth/40);
+          var resMinH  = Math.round(maxHeight/40);
+          toastr.error("Sua resolução de tela é muito pequena para esse tamanho de cenário ("+colunas+"x"+linhas+"). <br />Recomenda-se no máximo "+resMinH+"x"+resMinW+".");
+        }
+        else
+        {
+
+          $('#cenario').html('');
+          
+          $('#cenario').append('<img src="./assets/images/planeta01.png" width="'+hObj+'" height="'+hObj+'" style="position: fixed; top: '+hObj*(inicioY-1)+'px; left: '+hObj*(inicioX-1)+'px; z-index: 1;">');
+
+          $('#cenario').append('<img src="./assets/images/planeta02.png" width="'+hObj+'" height="'+hObj+'" style="position: fixed; top: '+hObj*(fimY-1)+'px; left: '+hObj*(fimX-1)+'px; z-index: 1;">');
+
+          $('#foguete').css('top',(hObj*(inicioY-1) + 5)+'px');
+          $('#foguete').css('left',(hObj*(inicioX-1) + 5)+'px');
+          $('#foguete').css('font-size',Math.round( (hObj/3)*2 )+'px');
+
+          cenario = new Array();
+
+          for(x = 0; x < linhas; x++) {
+            cenario[x] = new Array();
+            
+            for(y = 0; y < colunas; y++) {
+              cenario[x][y] = 1;
+            }
+          }
+
+          var ast = 0;
+          var comet = 0, ship = 0, satellite = 0;
+
+          while(ast < asteroides)
+          {
+            var xAux = Math.floor((Math.random() * (linhas) ) + 1);
+            var yAux = Math.floor((Math.random() * (colunas) ) + 1);
+
+            xAux = xAux-1;
+            yAux = yAux-1;
+
+
+            if( (xAux == (inicioX-1) && yAux == (inicioY-1) ) ){
+              //console.log('igual inicio');
+            }
+            else if( (xAux == (fimX-1) && yAux == (fimY-1) ) ){
+              //console.log('igual fim');
+            }
+            else if( cenario[xAux][yAux] != -1 )
+            {
+              cenario[xAux][yAux] = -1;
+
+              if(asteroides > 20)
+              {
+                if(comet < 6)
+                {
+                  $('#cenario').append('<img src="./assets/images/comet.png" width="'+hObj+'" height="'+hObj+'" style="position: fixed; top: '+hObj*yAux+'px; left: '+hObj*xAux+'px; z-index: 1;">');
+                  comet++;
+                }else if(ship < 1){
+                  $('#cenario').append('<img src="./assets/images/space-ship.png" width="'+hObj+'" height="'+hObj+'" style="position: fixed; top: '+hObj*yAux+'px; left: '+hObj*xAux+'px; z-index: 1;">');
+                  ship++;
+                }else if(satellite < 3){
+                  $('#cenario').append('<img src="./assets/images/satellite.png" width="'+hObj+'" height="'+hObj+'" style="position: fixed; top: '+hObj*yAux+'px; left: '+hObj*xAux+'px; z-index: 1;">');
+                  satellite++;
+                }else{
+                  $('#cenario').append('<img src="./assets/images/meteorito.png" width="'+hObj+'" height="'+hObj+'" style="position: fixed; top: '+hObj*yAux+'px; left: '+hObj*xAux+'px; z-index: 1;">');
+                }
+              }else{
+                $('#cenario').append('<img src="./assets/images/meteorito.png" width="'+hObj+'" height="'+hObj+'" style="position: fixed; top: '+hObj*yAux+'px; left: '+hObj*xAux+'px; z-index: 1;">');
+              }
+
+              ast++;
+            }
+
+          }
+
+          gerou = true;
+
+          $('#avLargura').html('');
+          $('#avProfundidade').html('');
+          $('#avGuloso').html('');
+          $('#avAEstrela').html('');
+
+        }
+
+      });
+      // Fim gerar cenario
+
+      // Inicio largura
+      $('#btnLargura').on('click', function() {
+
+        var inicio    = {x:(inicioX-1), y:(inicioY-1), peso: 0, nivel: 0};
+        var final     = {x:(fimX-1), y:(fimY-1), peso: 0, nivel: -1};
+
+        var t0            = performance.now();
+        var larguraR      = initLargura(inicio,final,cenario);// initLargura
+        var t1            = performance.now();
+
+
+        if(larguraR == false)
+        {
+          $('#avLargura').html('- O método de busca "Largura" foi concluído em '+ (t1 - t0).toFixed(2) +' milissegundos e não encontrou uma solução.');
+        }else{
+
+          larguraR.caminho.reverse();
+
+          larguraRes        = larguraR;
+          rodouLargura      = true;
+
+          $('#avLargura').html('- O método de busca "Largura" foi concluído em '+ (t1 - t0).toFixed(2) +' milissegundos.<br />- Efetuou '+larguraR.movimentos.length+' movimentos e sua solução final possui '+larguraR.caminho.length+' movimentos.<br /><br /><button class="btn btn-sm btn-info" onclick="javascript:rodar(larguraRes.movimentos);">Ver todos movimentos</button> <button class="btn btn-sm btn-info" onclick="javascript:rodar(larguraRes.caminho);">Ver solução</button>');
+
+        }
+        
+      });
+      // Fim largura
+
+      // Inicio largura
+      $('#btnProfundidade').on('click', function() {
+
+        var inicio    = {x:(inicioX-1), y:(inicioY-1), peso: 0, nivel: 0};
+        var final     = {x:(fimX-1), y:(fimY-1), peso: 0, nivel: -1};
+
+        var t0                = performance.now();
+        var profundidadeR     = profundidade(inicio,final,cenario);
+        var t1                = performance.now();
+
+        if(profundidadeR.solucao.length == 1 && profundidadeR.solucao[0].x == (inicioX-1) && profundidadeR.solucao[0].y == (inicioY-1) )
+        {
+        	$('#avProfundidade').html('- O método de busca "Profundidade" foi concluído em '+ (t1 - t0).toFixed(2) +' milissegundos e não encontrou uma solução.');
+        }else{
+
+	        ProfundRes        = profundidadeR;
+	        rodouProfund      = true;
+
+	        $('#avProfundidade').html('- O método de busca "Profundidade" foi concluído em '+ (t1 - t0).toFixed(2) +' milissegundos.<br />- Efetuou '+profundidadeR.movimentos.length+' movimentos e sua solução final possui '+profundidadeR.solucao.length+' movimentos.<br /><br /><button class="btn btn-sm btn-info" onclick="javascript:rodar(ProfundRes.movimentos);">Ver todos movimentos</button> <button class="btn btn-sm btn-info" onclick="javascript:rodar(ProfundRes.solucao);">Ver solução</button>');
+
+        }
+        
+
+      });
+      // Fim largura
+
+      // Inicio Guloso
+      $('#btnGuloso').on('click', function() {
+
+        var inicio    = {x:(inicioX-1), y:(inicioY-1), peso: 0, nivel: 0};
+        var final     = {x:(fimX-1), y:(fimY-1), peso: 0, nivel: -1};
+
+        var t0        = performance.now();
+        var Guloso    = guloso(inicio,final,cenario);
+        var t1        = performance.now();
+        
+        Guloso.caminho.reverse();
+
+        if( ! ( Guloso.caminho[(Guloso.caminho.length-1)].x == (fimX-1) && Guloso.caminho[(Guloso.caminho.length-1)].y == (fimY-1) ) )
+        {
+          $('#avGuloso').html('- O método de busca "Guloso" foi concluído em '+ (t1 - t0).toFixed(2) +' milissegundos e não encontrou uma solução.');
+        }else{
+
+          GulosoRes          = Guloso;
+          rodouGuloso        = true;
+
+          $('#avGuloso').html('- O método de busca "Guloso" foi concluído em '+ (t1 - t0).toFixed(2) +' milissegundos.<br />- Efetuou '+Guloso.movimentos.length+' movimentos e sua solução final possui '+Guloso.caminho.length+' movimentos.<br /><br /><button class="btn btn-sm btn-info" onclick="javascript:rodar(GulosoRes.movimentos);">Ver todos movimentos</button> <button class="btn btn-sm btn-info" onclick="javascript:rodar(GulosoRes.caminho);">Ver solução</button>');
+
+        }
+
+      });
+      // Fim Guloso
+
+      // Inicio A*
+      $('#btnAEstrela').on('click', function() {
+
+        var inicio    = {x:(inicioX-1), y:(inicioY-1), peso: 0, nivel: 0};
+        var final     = {x:(fimX-1), y:(fimY-1), peso: 0, nivel: -1};
+
+        var t0        = performance.now();
+        var AStar     = initAStar(inicio,final,cenario);
+        var t1        = performance.now();
+
+        AStar.caminho.reverse();
+
+        if( ! ( AStar.caminho[(AStar.caminho.length-1)].x == (fimX-1) && AStar.caminho[(AStar.caminho.length-1)].y == (fimY-1) ) )
+        {
+          $('#avAEstrela').html('- O método de busca "A*" foi concluído em '+ (t1 - t0).toFixed(2) +' milissegundos e não encontrou uma solução.');
+        }else{
+
+          AStarRes          = AStar;
+          rodouAStar        = true;
+
+          $('#avAEstrela').html('- O método de busca "A*" foi concluído em '+ (t1 - t0).toFixed(2) +' milissegundos.<br />- Efetuou '+AStar.movimentos.length+' movimentos e sua solução final possui '+AStar.caminho.length+' movimentos.<br /><br /><button class="btn btn-sm btn-info" onclick="javascript:rodar(AStarRes.movimentos);">Ver todos movimentos</button> <button class="btn btn-sm btn-info" onclick="javascript:rodar(AStarRes.caminho);">Ver solução</button>');
+
+        }
+
+      });
+      // Fim A*
+
+      // Executar movimentação do foguete baseado no array
+      function rodar(arr)
+      {
+        $('#opcoesModal').modal('hide');
+        $('#fogoFoguete').show();
+
+        for(x = 0; x < arr.length; x++)
+        {
+          movFoguete(x,arr);
+        }
+
+      }
+
+      // Movimentar e girar o foguete
+      function movFoguete(x,arr)
+      {
+        $("#foguete").animate({ 
+          top: (hObj*(arr[x].y))+'px',
+          left: (hObj*(arr[x].x))+'px',
+        }, 200, function(){
+
+          window.oldTopAt = window.topAt;
+
+          if(x < (arr.length - 1) )
+          {
+            
+            if(arr[x].x > arr[x+1].x)
+              window.topAt = -135;
+            else if(arr[x].x < arr[x+1].x)
+              window.topAt = 45;
+            else
+            {
+              if(arr[x].y > arr[x+1].y)
+                window.topAt = -45;          
+              else if(arr[x].y < arr[x+1].y)
+                window.topAt = 135;    
+            }
+
+          }
+
+          $("#foguete").animateRotate(window.oldTopAt, window.topAt, 200, "linear", function(){});
+        });
+
+        return topAt;
+      }
+    </script>
+
+   
+  </body>
+</html>
